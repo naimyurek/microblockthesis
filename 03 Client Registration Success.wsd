@@ -1,0 +1,39 @@
+@startuml CustomerRegistrationScenario
+!pragma teoz true
+
+title "Customer Registration Success Scenario"
+
+hide footbox
+actor Customer
+
+
+box "Internal Services" #LightBlue
+collections GatewayService
+collections DiscoveryService
+collections AuthService
+queue MessageQueueBroker
+end box
+
+box "User Defined Services"
+collections CustomerService
+database CustomerDB
+database AuthDB
+collections ProductService
+end box
+
+Customer -> GatewayService ++ : customer/\nregister(customerInf, authInf)
+GatewayService -> DiscoveryService ++ : getServiceInfo(customerService)
+return serviceAddress 
+GatewayService -> CustomerService ++ : registerCustomer(customerInf, authInf)
+CustomerService -> CustomerDB ++: insert(customerInf)
+return return OK 
+CustomerService -> MessageQueueBroker ++ : pushMessage(authInf)
+MessageQueueBroker -> AuthService ++ : dispatch(newCustomerInf)
+AuthService -> AuthDB ++ : insert(authInf)
+return return OK 
+AuthService -> MessageQueueBroker -- : updateMessage(OK)
+MessageQueueBroker -> CustomerService -- : dispatch(OK)
+return return OK 
+return return OK 
+
+@enduml

@@ -1,0 +1,40 @@
+@startuml
+!pragma teoz true
+
+hide footbox
+box "Internal Service" #LightBlue
+participant GatewayService
+participant ConfigService
+participant AuthService
+queue MessageQueueBroker
+end box
+
+box "Other Service"
+participant CustomerService
+participant ProductService
+end box
+
+
+==Init Started==
+GatewayService -> ConfigService ++ : getConfig()
+return config 
+ AuthService -> ConfigService ++ : getConfig()
+return config 
+ MessageQueueBroker -> ConfigService ++ : getConfig()
+return config 
+ CustomerService -> ConfigService ++ : getConfig()
+return config 
+ ProductService -> ConfigService ++ : getConfig()
+ConfigService -> ProductService -- : config
+==Init Finish==
+
+loop is service up 
+ConfigService -> GatewayService : refreshConfig(config)
+ConfigService -> AuthService : refreshConfig(config)
+ConfigService -> MessageQueueBroker : refreshConfig(config)
+ConfigService -> CustomerService : refreshConfig(config)
+ConfigService -> ProductService : refreshConfig(config)
+end
+
+
+@enduml

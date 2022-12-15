@@ -1,0 +1,40 @@
+@startuml CustomerRegistrationFailureScenarioAuthServiceUnavailable
+!pragma teoz true
+
+title "Customer Registration Failure Scenario: AuthService Unavailable"
+
+hide footbox
+actor Customer
+
+
+box "Internal Services" #LightBlue
+collections GatewayService
+collections DiscoveryService
+collections AuthService
+queue MessageQueueBroker
+end box
+
+box "User Defined Services"
+collections CustomerService
+database CustomerDB
+database UserDB
+collections ProductService
+end box
+
+Customer -> GatewayService ++ : customer/registerCustomer(customerInf, userInf)
+GatewayService -> DiscoveryService ++ : getServiceInfo(customerService)
+return serviceAddress 
+GatewayService -> CustomerService ++ : registerCustomer(customerInf, userInf)
+CustomerService -> CustomerDB ++: insert(customerInf)
+return return OK 
+CustomerService -> MessageQueueService ++ : pushMessage(userInf)
+MessageQueueService ->x AuthService -- : dispatch(newCustomerInf)
+note over AuthService: Service Not Available \nThere is no dispatch
+...Expiry Time...
+CustomerService -> CustomerDB ++: rollback(customerInf)
+return return OK 
+return return TIME_OUT 
+return return TIME_OUT 
+
+
+@enduml

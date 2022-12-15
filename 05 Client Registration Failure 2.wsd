@@ -1,0 +1,50 @@
+@startuml CustomerRegistrationFailureScenarioSlowMessageQueue
+!pragma teoz true
+
+hide footbox
+actor Customer
+
+title "Customer Registration Failure Scenario: Slow MessageQueue"
+
+box "Internal Services" #LightBlue
+collections GatewayService
+collections DiscoveryService
+collections AuthService
+queue MessageQueueBroker
+end box
+
+box "User Defined Services"
+collections CustomerService
+database CustomerDB
+database UserDB
+collections ProductService
+end box
+
+Customer -> GatewayService ++ : customer/registerCustomer(customerInf, userInf)
+GatewayService -> DiscoveryService ++ : getServiceInfo(customerService)
+return serviceAddress 
+GatewayService -> CustomerService ++ : registerCustomer(customerInf, userInf)
+CustomerService -> CustomerDB ++: insert(customerInf)
+return return OK 
+CustomerService -> MessageQueueBroker : pushMessage(userInf)
+...Expiry Time...
+CustomerService -> CustomerDB ++: rollback(customerInf)
+return return OK 
+return return FAIL 
+return return FAIL 
+...After a While...
+MessageQueueBroker -> AuthService ++ : dispatch(newCustomerInf)
+AuthService -> UserDB ++ : insert(UserInf)
+return return OK 
+AuthService -> MessageQueueBroker -- : updateMessage(OK)
+MessageQueueBroker -> CustomerService -- : dispatch(OK)
+CustomerService -> MessageQueueBroker ++ : pushMessage(FAIL)
+MessageQueueBroker -> AuthService ++ : dispatch(ROLLBACK)
+AuthService -> UserDB ++ : rollback(UserInf)
+return return OK 
+AuthService -> MessageQueueBroker -- : updateMessage(ROLLBACK_SUCCESS) 
+MessageQueueBroker -> CustomerService -- : dispatch(ROLLBACK_SUCCESS)
+
+
+
+@enduml
