@@ -27,11 +27,11 @@ DiscoveryService --> ProductService -- : return OK
 ==Init Finish==
 
 loop Periodically
-GatewayService -> DiscoveryService : healthCheck()
-AuthService -> DiscoveryService : healthCheck()
-MessageQueueBroker -> DiscoveryService : healthCheck()
-CustomerService -> DiscoveryService : healthCheck()
-ProductService -> DiscoveryService : healthCheck()
+GatewayService -> DiscoveryService : healthCheck(loadStatus)
+AuthService -> DiscoveryService : healthCheck(loadStatus)
+MessageQueueBroker -> DiscoveryService : healthCheck(loadStatus)
+CustomerService -> DiscoveryService : healthCheck(loadStatus)
+ProductService -> DiscoveryService : healthCheck(loadStatus)
 end
 
 

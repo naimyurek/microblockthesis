@@ -9,6 +9,7 @@ actor Customer
 
 box "Internal Services" #LightBlue
 collections GatewayService
+collections LoadBalancer
 collections DiscoveryService
 collections AuthService
 queue MessageQueueBroker
@@ -22,9 +23,10 @@ collections ProductService
 end box
 
 Customer -> GatewayService ++ : customer/\nregister(customerInf, authInf)
-GatewayService -> DiscoveryService ++ : getServiceInfo(customerService)
+GatewayService -> LoadBalancer ++ : customer/\nregister(customerInf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(customerService)
 return serviceAddress 
-GatewayService -> CustomerService ++ : registerCustomer(customerInf, authInf)
+LoadBalancer -> CustomerService ++ : serviceAddress/customer/registerCustomer(customerInf, authInf)
 CustomerService -> CustomerDB ++: insert(customerInf)
 return return OK 
 CustomerService -> MessageQueueBroker ++ : pushMessage(authInf)

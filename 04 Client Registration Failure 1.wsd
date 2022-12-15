@@ -22,9 +22,10 @@ collections ProductService
 end box
 
 Customer -> GatewayService ++ : customer/registerCustomer(customerInf, userInf)
-GatewayService -> DiscoveryService ++ : getServiceInfo(customerService)
+GatewayService -> LoadBalancer ++ : customer/\nregister(customerInf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(customerService)
 return serviceAddress 
-GatewayService -> CustomerService ++ : registerCustomer(customerInf, userInf)
+LoadBalancer -> CustomerService ++ : serviceAddress/customer/registerCustomer(customerInf, authInf)
 CustomerService -> CustomerDB ++: insert(customerInf)
 return return OK 
 CustomerService -> MessageQueueService ++ : pushMessage(userInf)
