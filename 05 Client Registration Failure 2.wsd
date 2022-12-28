@@ -8,16 +8,16 @@ title "Customer Registration Failure Scenario: Slow MessageQueue"
 
 box "Internal Services" #LightBlue
 collections GatewayService
+collections LoadBalancer
 collections DiscoveryService
 collections AuthService
 queue MessageQueueBroker
 end box
 
-box "User Defined Services"
+box "Microservices"
 collections CustomerService
 database CustomerDB
 database UserDB
-collections ProductService
 end box
 
 Customer -> GatewayService ++ : customer/registerCustomer(customerInf, userInf)
@@ -31,6 +31,7 @@ CustomerService -> MessageQueueBroker : pushMessage(userInf)
 ...Expiry Time...
 CustomerService -> CustomerDB ++: rollback(customerInf)
 return return OK 
+return return FAIL 
 return return FAIL 
 return return FAIL 
 ...After a While...

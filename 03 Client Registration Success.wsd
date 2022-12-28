@@ -15,7 +15,7 @@ collections AuthService
 queue MessageQueueBroker
 end box
 
-box "User Defined Services"
+box "Microservices"
 collections CustomerService
 database CustomerDB
 database AuthDB

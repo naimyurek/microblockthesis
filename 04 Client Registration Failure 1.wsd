@@ -9,16 +9,16 @@ actor Customer
 
 box "Internal Services" #LightBlue
 collections GatewayService
+collections LoadBalancer
 collections DiscoveryService
 collections AuthService
 queue MessageQueueBroker
 end box
 
-box "User Defined Services"
+box "Microservices"
 collections CustomerService
 database CustomerDB
 database UserDB
-collections ProductService
 end box
 
 Customer -> GatewayService ++ : customer/registerCustomer(customerInf, userInf)
@@ -28,12 +28,13 @@ return serviceAddress
 LoadBalancer -> CustomerService ++ : serviceAddress/customer/registerCustomer(customerInf, authInf)
 CustomerService -> CustomerDB ++: insert(customerInf)
 return return OK 
-CustomerService -> MessageQueueService ++ : pushMessage(userInf)
-MessageQueueService ->x AuthService -- : dispatch(newCustomerInf)
+CustomerService -> MessageQueueBroker ++ : pushMessage(userInf)
+MessageQueueBroker ->x AuthService -- : dispatch(newCustomerInf)
 note over AuthService: Service Not Available \nThere is no dispatch
 ...Expiry Time...
 CustomerService -> CustomerDB ++: rollback(customerInf)
 return return OK 
+return return TIME_OUT 
 return return TIME_OUT 
 return return TIME_OUT 
 
