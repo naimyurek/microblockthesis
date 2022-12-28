@@ -31,6 +31,7 @@ return return OK
 MS1 -> MessageQueueBroker : pushMessage(userInf)
 ...Expiry Time...
 MS1 -> MS1DB ++: rollback(ms1Inf)
+MS1 -> MessageQueueBroker : pushMessage(userInf,FAIL)
 return return OK 
 return return FAIL 
 return return FAIL 
