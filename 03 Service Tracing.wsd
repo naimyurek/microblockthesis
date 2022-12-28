@@ -1,0 +1,32 @@
+@startuml CustomerRegistrationScenario
+!pragma teoz true
+
+title "Circuit Breaker Open Scenario"
+
+hide footbox
+actor Customer
+
+
+box "Internal Services" #LightBlue
+collections TraceInstrumentation
+collections ZipkinCollector
+end box
+
+box "Microservices"
+collections MS1
+end box
+
+Customer -> TraceInstrumentation ++ : ms1/api(ms1Inf)
+TraceInstrumentation -> TraceInstrumentation : record tags
+TraceInstrumentation -> TraceInstrumentation : add trace headers
+TraceInstrumentation -> TraceInstrumentation : record timestamp
+TraceInstrumentation -> MS1 ++ : ms1/api(ms1Inf) \nX-B3-TraceId: aa \nX-B3-SpanId: 6b 
+return OK
+TraceInstrumentation -> TraceInstrumentation : record duration
+return OK
+TraceInstrumentation -> ZipkinCollector : asynchronously report span
+note right TraceInstrumentation: {\n"traceId": "aa", \n"id": "6b",\n"name": "get", \n "timestamp": 1483945573944000,\n"duration": 386000, \n"annotations": [  \n ...
+
+
+
+@enduml

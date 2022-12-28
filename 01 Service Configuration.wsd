@@ -10,7 +10,7 @@ collections AuthService
 end box
 
 box "Microservices"
-collections CustomerService
+collections MS1
 end box
 
 
@@ -22,14 +22,14 @@ GatewayService -> ConfigService ++ : getConfig()
 return config 
  AuthService -> ConfigService ++ : getConfig()
 return config  
- CustomerService -> ConfigService ++ : getConfig()
+ MS1 -> ConfigService ++ : getConfig()
 return config 
 ==Init Finish==
 
 alt When config changed
 ConfigService -> GatewayService : refreshConfig(config)
 ConfigService -> AuthService : refreshConfig(config)
-ConfigService -> CustomerService : refreshConfig(config)
+ConfigService -> MS1 : refreshConfig(config)
 end
 
 

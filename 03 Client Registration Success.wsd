@@ -16,25 +16,24 @@ queue MessageQueueBroker
 end box
 
 box "Microservices"
-collections CustomerService
-database CustomerDB
+collections MS1
+database MS1DB
 database AuthDB
-collections ProductService
 end box
 
-Customer -> GatewayService ++ : customer/\nregister(customerInf, authInf)
-GatewayService -> LoadBalancer ++ : customer/\nregister(customerInf, authInf)
-LoadBalancer -> DiscoveryService ++ : getServiceInfo(customerService)
+Customer -> GatewayService ++ : ms1/\napi(ms1Inf, authInf)
+GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
 return serviceAddress 
-LoadBalancer -> CustomerService ++ : serviceAddress/customer/registerCustomer(customerInf, authInf)
-CustomerService -> CustomerDB ++: insert(customerInf)
+LoadBalancer -> MS1 ++ : serviceAddress/ms1/api(ms1Inf, authInf)
+MS1 -> MS1DB ++: insert(ms1Inf)
 return return OK 
-CustomerService -> MessageQueueBroker ++ : pushMessage(authInf)
-MessageQueueBroker -> AuthService ++ : dispatch(newCustomerInf)
+MS1 -> MessageQueueBroker ++ : pushMessage(authInf)
+MessageQueueBroker -> AuthService ++ : dispatch(newms1Inf)
 AuthService -> AuthDB ++ : insert(authInf)
 return return OK 
 AuthService -> MessageQueueBroker -- : updateMessage(OK)
-MessageQueueBroker -> CustomerService -- : dispatch(OK)
+MessageQueueBroker -> MS1 -- : dispatch(OK)
 return return OK 
 return return OK 
 

@@ -1,0 +1,38 @@
+@startuml CustomerRegistrationScenario
+!pragma teoz true
+
+title "Circuit Breaker Open Scenario"
+
+hide footbox
+actor Customer
+
+
+box "Internal Services" #LightBlue
+collections CircuitBreaker
+end box
+
+box "Microservices"
+collections MS1
+end box
+
+Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
+return Connection Problem
+return Connection Problem
+
+Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
+return Connection Problem
+return Connection Problem
+
+Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
+return Connection Problem
+CircuitBreaker -> CircuitBreaker: Circuit Open
+return Connection Problem
+
+Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
+return Circuit Open
+
+
+@enduml

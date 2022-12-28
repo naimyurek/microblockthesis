@@ -1,0 +1,33 @@
+@startuml StartupScenario
+!pragma teoz true
+
+title "Service Discovery Scenario"
+hide footbox
+box "Internal Service" #LightBlue
+collections GatewayService
+collections DiscoveryService
+collections AuthService
+end box
+
+box "Microservices"
+collections MS1
+end box
+
+
+==Init Started==
+GatewayService -> DiscoveryService ++ : register(urlAddress, serviceName)
+return return OK 
+ AuthService -> DiscoveryService ++ : register(urlAddress, serviceName)
+return return OK
+ MS1 -> DiscoveryService ++ : register(urlAddress, serviceName)
+return return OK 
+==Init Finish==
+
+loop Periodically
+GatewayService -> DiscoveryService : healthCheck(loadStatus)
+AuthService -> DiscoveryService : healthCheck(loadStatus)
+MS1 -> DiscoveryService : healthCheck(loadStatus)
+end
+
+
+@enduml

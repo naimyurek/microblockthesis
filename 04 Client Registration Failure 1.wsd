@@ -16,23 +16,23 @@ queue MessageQueueBroker
 end box
 
 box "Microservices"
-collections CustomerService
-database CustomerDB
+collections MS1
+database MS1DB
 database UserDB
 end box
 
-Customer -> GatewayService ++ : customer/registerCustomer(customerInf, userInf)
-GatewayService -> LoadBalancer ++ : customer/\nregister(customerInf, authInf)
-LoadBalancer -> DiscoveryService ++ : getServiceInfo(customerService)
+Customer -> GatewayService ++ : customer/registerCustomer(ms1Inf, userInf)
+GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
 return serviceAddress 
-LoadBalancer -> CustomerService ++ : serviceAddress/customer/registerCustomer(customerInf, authInf)
-CustomerService -> CustomerDB ++: insert(customerInf)
+LoadBalancer -> MS1 ++ : serviceAddress/ms1/api(ms1Inf, authInf)
+MS1 -> MS1DB ++: insert(ms1Inf)
 return return OK 
-CustomerService -> MessageQueueBroker ++ : pushMessage(userInf)
-MessageQueueBroker ->x AuthService -- : dispatch(newCustomerInf)
+MS1 -> MessageQueueBroker ++ : pushMessage(userInf)
+MessageQueueBroker ->x AuthService -- : dispatch(newms1Inf)
 note over AuthService: Service Not Available \nThere is no dispatch
 ...Expiry Time...
-CustomerService -> CustomerDB ++: rollback(customerInf)
+MS1 -> MS1DB ++: rollback(ms1Inf)
 return return OK 
 return return TIME_OUT 
 return return TIME_OUT 

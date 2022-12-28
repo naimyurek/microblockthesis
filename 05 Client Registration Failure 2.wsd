@@ -15,37 +15,38 @@ queue MessageQueueBroker
 end box
 
 box "Microservices"
-collections CustomerService
-database CustomerDB
-database UserDB
+collections MS1
 end box
 
-Customer -> GatewayService ++ : customer/registerCustomer(customerInf, userInf)
-GatewayService -> LoadBalancer ++ : customer/\nregister(customerInf, authInf)
-LoadBalancer -> DiscoveryService ++ : getServiceInfo(customerService)
+database MS1DB
+database UserDB
+
+Customer -> GatewayService ++ : customer/registerCustomer(ms1Inf, userInf)
+GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
 return serviceAddress 
-LoadBalancer -> CustomerService ++ : serviceAddress/customer/registerCustomer(customerInf, authInf)
-CustomerService -> CustomerDB ++: insert(customerInf)
+LoadBalancer -> MS1 ++ : serviceAddress/ms1/api(ms1Inf, authInf)
+MS1 -> MS1DB ++: insert(ms1Inf)
 return return OK 
-CustomerService -> MessageQueueBroker : pushMessage(userInf)
+MS1 -> MessageQueueBroker : pushMessage(userInf)
 ...Expiry Time...
-CustomerService -> CustomerDB ++: rollback(customerInf)
+MS1 -> MS1DB ++: rollback(ms1Inf)
 return return OK 
 return return FAIL 
 return return FAIL 
 return return FAIL 
 ...After a While...
-MessageQueueBroker -> AuthService ++ : dispatch(newCustomerInf)
+MessageQueueBroker -> AuthService ++ : dispatch(newms1Inf)
 AuthService -> UserDB ++ : insert(UserInf)
 return return OK 
 AuthService -> MessageQueueBroker -- : updateMessage(OK)
-MessageQueueBroker -> CustomerService -- : dispatch(OK)
-CustomerService -> MessageQueueBroker ++ : pushMessage(FAIL)
+MessageQueueBroker -> MS1 -- : dispatch(OK)
+MS1 -> MessageQueueBroker ++ : pushMessage(FAIL)
 MessageQueueBroker -> AuthService ++ : dispatch(ROLLBACK)
 AuthService -> UserDB ++ : rollback(UserInf)
 return return OK 
 AuthService -> MessageQueueBroker -- : updateMessage(ROLLBACK_SUCCESS) 
-MessageQueueBroker -> CustomerService -- : dispatch(ROLLBACK_SUCCESS)
+MessageQueueBroker -> MS1 -- : dispatch(ROLLBACK_SUCCESS)
 
 
 
