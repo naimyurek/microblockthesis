@@ -11,6 +11,7 @@ collections GatewayService
 collections LoadBalancer
 collections DiscoveryService
 collections AuthService
+database AuthDB
 queue MessageQueueBroker
 end box
 
@@ -19,14 +20,14 @@ collections MS1
 end box
 
 database MS1DB
-database UserDB
 
-Customer -> GatewayService ++ : customer/registerCustomer(ms1Inf, userInf)
+
+Customer -> GatewayService ++ : ms1/api(ms1Inf, userInf)
 GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
 LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
 return serviceAddress 
 LoadBalancer -> MS1 ++ : serviceAddress/ms1/api(ms1Inf, authInf)
-MS1 -> MS1DB ++: insert(ms1Inf)
+MS1 -> MS1DB ++: dbprocess(ms1Inf)
 return return OK 
 MS1 -> MessageQueueBroker : pushMessage(userInf)
 ...Expiry Time...
@@ -38,13 +39,13 @@ return return FAIL
 return return FAIL 
 ...After a While...
 MessageQueueBroker -> AuthService ++ : dispatch(newms1Inf)
-AuthService -> UserDB ++ : insert(UserInf)
+AuthService -> AuthDB ++ : dbprocess(UserInf)
 return return OK 
 AuthService -> MessageQueueBroker -- : updateMessage(OK)
 MessageQueueBroker -> MS1 -- : dispatch(OK)
 MS1 -> MessageQueueBroker ++ : pushMessage(FAIL)
 MessageQueueBroker -> AuthService ++ : dispatch(ROLLBACK)
-AuthService -> UserDB ++ : rollback(UserInf)
+AuthService -> AuthDB ++ : rollback(UserInf)
 return return OK 
 AuthService -> MessageQueueBroker -- : updateMessage(ROLLBACK_SUCCESS) 
 MessageQueueBroker -> MS1 -- : dispatch(ROLLBACK_SUCCESS)

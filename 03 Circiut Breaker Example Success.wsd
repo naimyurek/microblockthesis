@@ -1,0 +1,54 @@
+@startuml CustomerRegistrationScenario
+!pragma teoz true
+
+title "Customer Example Success Scenario"
+
+hide footbox
+actor Customer
+
+
+box "Internal Services" #LightBlue
+collections GatewayService
+collections LoadBalancer
+collections DiscoveryService
+collections AuthService
+database AuthDB
+queue MessageQueueBroker
+end box
+
+box "Microservices"
+collections MS1
+collections MS2
+database MS2DB
+end box
+
+Customer -> GatewayService ++ : ms1/\napi(ms1Inf, authInf)
+GatewayService -> LoadBalancer : ms1/\napi(ms1Inf, authInf)
+activate LoadBalancer
+LoadBalancer -> DiscoveryService : getServiceInfo(MS1)
+activate DiscoveryService
+DiscoveryService -> LoadBalancer : serviceAddress
+deactivate DiscoveryService
+LoadBalancer -> MS1 ++ : serviceAddress/ms1/api(ms1Inf, authInf)
+deactivate LoadBalancer
+MS1 -> MessageQueueBroker ++ : pushMessage(authInf)
+MessageQueueBroker -> AuthService ++ : dispatch(authInf)
+AuthService -> AuthDB ++ : check(authInf)
+return return OK 
+AuthService -> MessageQueueBroker -- : updateMessage(OK)
+MessageQueueBroker -> MS1 -- : dispatch(token)
+note over MS1: MS1 Service Process Complated\n Call MS2 Process
+MS1 -> LoadBalancer ++ : ms2/\napi(ms2Inf, token)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
+return serviceAddress 
+LoadBalancer -> MS2 ++ : serviceAddress/ms2/api(ms2Inf, token)
+deactivate LoadBalancer
+MS2 -> MessageQueueBroker ++ : pushMessage(token)
+MessageQueueBroker -> AuthService ++ : dispatch(token)
+AuthService -> AuthDB ++ : check(token)
+return return OK 
+AuthService -> MessageQueueBroker -- : updateMessage(OK)
+MessageQueueBroker -> MS2 -- : dispatch(token)
+
+
+@enduml

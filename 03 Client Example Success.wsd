@@ -1,0 +1,40 @@
+@startuml CustomerRegistrationScenario
+!pragma teoz true
+
+title "Customer Example Success Scenario"
+
+hide footbox
+actor Customer
+
+
+box "Internal Services" #LightBlue
+collections GatewayService
+collections LoadBalancer
+collections DiscoveryService
+collections AuthService
+database AuthDB
+queue MessageQueueBroker
+end box
+
+box "Microservices"
+collections MS1
+database MS1DB
+end box
+
+Customer -> GatewayService ++ : ms1/\napi(ms1Inf, authInf)
+GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
+return serviceAddress 
+LoadBalancer -> MS1 ++ : serviceAddress/ms1/api(ms1Inf, authInf)
+MS1 -> MessageQueueBroker ++ : pushMessage(authInf)
+MessageQueueBroker -> AuthService ++ : dispatch(authInf)
+AuthService -> AuthDB ++ : check(authInf)
+return return OK 
+AuthService -> MessageQueueBroker -- : updateMessage(OK)
+MessageQueueBroker -> MS1 -- : dispatch(OK)
+MS1 -> MS1DB ++: dbprocess(ms1Inf)
+return return OK 
+return return OK 
+return return OK 
+
+@enduml
