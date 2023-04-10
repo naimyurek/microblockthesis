@@ -1,0 +1,31 @@
+@startuml PrimeAppScenario
+!pragma teoz true
+
+title "Prime App Example Success Scenario"
+
+hide footbox
+actor Customer
+
+
+box "Internal Services" #LightBlue
+participant GatewayService
+participant LoadBalancer
+participant DiscoveryService
+participant AuthService
+end box
+
+box "Microservices"
+participant PrimeAppMS
+end box
+
+Customer -> GatewayService ++ : prime/\ncalculate(upperPrimeLimit ,authInf)
+GatewayService -> LoadBalancer ++ : prime/\ncalculate(upperPrimeLimit, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(prime)
+return serviceAddress 
+LoadBalancer -> PrimeAppMS ++ : serviceAddress/prime/calculate(upperPrimeLimit, authInf)
+PrimeAppMS -> AuthService ++ : checkAuthenticate(authInf)
+AuthService -> PrimeAppMS -- : return(primeNumber)
+return return primeNumber 
+return return primeNumber 
+
+@enduml
