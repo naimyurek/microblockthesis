@@ -1,0 +1,31 @@
+@startuml MovieAppScenario
+!pragma teoz true
+
+title "Movie App Example Success Scenario"
+
+hide footbox
+actor Customer
+
+
+box "Internal Services" #LightBlue
+participant GatewayService
+participant LoadBalancer
+participant DiscoveryService
+participant AuthService
+end box
+
+box "Microservices"
+participant PrimeAppMS
+end box
+
+Customer -> GatewayService ++ : ms1/\napi(ms1Inf, authInf)
+GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
+return serviceAddress 
+LoadBalancer -> PrimeAppMS ++ : serviceAddress/ms1/api(ms1Inf, authInf)
+PrimeAppMS -> AuthService ++ : pushMessage(authInf)
+AuthService -> PrimeAppMS -- : dispatch(OK)
+return return OK 
+return return OK 
+
+@enduml
