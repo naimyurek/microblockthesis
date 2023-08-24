@@ -1,7 +1,7 @@
 @startuml CustomerRegistrationScenario
 !pragma teoz true
 
-title "Circuit Breaker Open Scenario"
+title "Circuit Breaker Close Scenario"
 
 hide footbox
 actor Customer
@@ -24,6 +24,8 @@ CircuitBreaker -> CircuitBreaker: Circuit Half Open
 alt when state is half open and connection problem is running
 Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
 CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> CircuitBreaker: tx = addTransaction(CB,MS1,ms1Inf)
+CircuitBreaker ->? : << diffuse tx to all >>
 return Connection Problem
 CircuitBreaker -> CircuitBreaker: Circuit Open
 return Connection Problem
@@ -31,6 +33,8 @@ return Connection Problem
 else when state is half open and connection problem is resolved
 Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
 CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> CircuitBreaker: tx = addTransaction(CB,MS1,ms1Inf)
+CircuitBreaker ->? : << diffuse tx to all >>
 return OK
 CircuitBreaker -> CircuitBreaker: Circuit Close
 return OK
@@ -40,6 +44,8 @@ end
 
 Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
 CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> CircuitBreaker: tx = addTransaction(CB,MS1,ms1Inf)
+CircuitBreaker ->? : << diffuse tx to all >>
 return Connection Problem
 return Connection Problem
 

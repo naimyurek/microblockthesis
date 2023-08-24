@@ -1,7 +1,7 @@
 @startuml WebAccessAppScenario
 !pragma teoz true
 
-title "Prime App Example Success Scenario"
+title "Webaccap App Example Scenario"
 
 hide footbox
 actor Customer
@@ -15,16 +15,22 @@ participant AuthService
 end box
 
 box "Microservices"
-participant PrimeAppMS
+participant WebAccessAppMS
 end box
-
-Customer -> GatewayService ++ : ms1/\napi(ms1Inf, authInf)
-GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
-LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
+loop Periodically
+GatewayService -> GatewayService : block = createBlock()
+GatewayService -> GatewayService : addTransactions(transactionList)
+GatewayService -> GatewayService : appendChain(block)
+end
+Customer -> GatewayService ++ : webacc/\ngreeting(webaccInf, authInf)
+GatewayService -> LoadBalancer ++ : webacc/\ngreeting(webaccInf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(webacc)
 return serviceAddress 
-LoadBalancer -> PrimeAppMS ++ : serviceAddress/ms1/api(ms1Inf, authInf)
-PrimeAppMS -> AuthService ++ : pushMessage(authInf)
-AuthService -> PrimeAppMS -- : dispatch(OK)
+LoadBalancer -> WebAccessAppMS ++ : serviceAddress/webacc/greeting(webaccInf, authInf)
+LoadBalancer -> LoadBalancer: tx = addTransaction(CB,WebAccessAppMS,webaccInf)
+LoadBalancer ->? : << diffuse tx to all >>
+WebAccessAppMS -> AuthService ++ : pushMessage(authInf)
+AuthService -> WebAccessAppMS -- : dispatch(OK)
 return return OK 
 return return OK 
 

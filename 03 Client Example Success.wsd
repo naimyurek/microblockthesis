@@ -23,9 +23,16 @@ end box
 
 Customer -> GatewayService ++ : ms1/\napi(ms1Inf, authInf)
 GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
+loop Periodically
+GatewayService -> GatewayService : block = createBlock()
+GatewayService -> GatewayService : addTransactions(transactionList)
+GatewayService -> GatewayService : appendChain(block)
+end
 LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
 return serviceAddress 
 LoadBalancer -> MS1 ++ : serviceAddress/ms1/api(ms1Inf, authInf)
+LoadBalancer -> LoadBalancer: tx = addTransaction(CB,MS1,ms1Inf)
+LoadBalancer ->? : << diffuse tx to all >>
 MS1 -> MessageQueueBroker ++ : pushMessage(authInf)
 MessageQueueBroker -> AuthService ++ : dispatch(authInf)
 AuthService -> AuthDB ++ : check(authInf)

@@ -1,7 +1,7 @@
 @startuml PrimeAppScenario
 !pragma teoz true
 
-title "Prime App Example Success Scenario"
+title "Prime App Example Scenario"
 
 hide footbox
 actor Customer
@@ -17,12 +17,18 @@ end box
 box "Microservices"
 participant PrimeAppMS
 end box
-
+loop Periodically
+GatewayService -> GatewayService : block = createBlock()
+GatewayService -> GatewayService : addTransactions(transactionList)
+GatewayService -> GatewayService : appendChain(block)
+end
 Customer -> GatewayService ++ : prime/\ncalculate(upperPrimeLimit ,authInf)
 GatewayService -> LoadBalancer ++ : prime/\ncalculate(upperPrimeLimit, authInf)
 LoadBalancer -> DiscoveryService ++ : getServiceInfo(prime)
 return serviceAddress 
 LoadBalancer -> PrimeAppMS ++ : serviceAddress/prime/calculate(upperPrimeLimit, authInf)
+LoadBalancer -> LoadBalancer: tx = addTransaction(CB,PrimeAppMS,upperPrimeLimit)
+LoadBalancer ->? : << diffuse tx to all >>
 PrimeAppMS -> AuthService ++ : checkAuthenticate(authInf)
 AuthService -> PrimeAppMS -- : return(primeNumber)
 return return primeNumber 

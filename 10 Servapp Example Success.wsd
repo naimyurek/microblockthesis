@@ -1,7 +1,7 @@
 @startuml ServeAppScenario
 !pragma teoz true
 
-title "Prime App Example Success Scenario"
+title "Serve App Example Scenario"
 
 hide footbox
 actor Customer
@@ -15,16 +15,18 @@ participant AuthService
 end box
 
 box "Microservices"
-participant PrimeAppMS
+participant ServeAppMS
 end box
 
-Customer -> GatewayService ++ : ms1/\napi(ms1Inf, authInf)
-GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
-LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
+Customer -> GatewayService ++ : serve/\ngetMovieAndPrime(serveInf, authInf)
+GatewayService -> LoadBalancer ++ : serve/\ngetMovieAndPrime(serveInf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(serve)
 return serviceAddress 
-LoadBalancer -> PrimeAppMS ++ : serviceAddress/ms1/api(ms1Inf, authInf)
-PrimeAppMS -> AuthService ++ : pushMessage(authInf)
-AuthService -> PrimeAppMS -- : dispatch(OK)
+LoadBalancer -> ServeAppMS ++ : serviceAddress/serve/getMovieAndPrime(serveInf, authInf)
+LoadBalancer -> LoadBalancer: tx = addTransaction(CB,ServeAppMS,serveInf)
+LoadBalancer ->? : << diffuse tx to all >>
+ServeAppMS -> AuthService ++ : pushMessage(authInf)
+AuthService -> ServeAppMS -- : dispatch(OK)
 return return OK 
 return return OK 
 

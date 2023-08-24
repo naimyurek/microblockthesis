@@ -17,21 +17,30 @@ end box
 
 Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
 CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> CircuitBreaker: tx = addTransaction(CB,MS1,ms1Inf)
+CircuitBreaker ->? : << diffuse tx to all >>
+
+return Connection Problem
+return Connection Problem
+
+Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> CircuitBreaker: tx = addTransaction(CB,MS1,ms1Inf)
+CircuitBreaker ->? : << diffuse tx to all >>
 return Connection Problem
 return Connection Problem
 
 Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
 CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
 return Connection Problem
-return Connection Problem
-
-Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
-CircuitBreaker -> MS1 ++ : ms1/\napi(ms1Inf)
-return Connection Problem
+CircuitBreaker -> CircuitBreaker: tx = addTransaction(CB,MS1,ms1Inf)
+CircuitBreaker ->? : << diffuse tx to all >>
 CircuitBreaker -> CircuitBreaker: Circuit Open
 return Connection Problem
 
 Customer -> CircuitBreaker ++ : ms1/\napi(ms1Inf)
+CircuitBreaker -> CircuitBreaker: tx = addTransaction(CB,MS1,ms1Inf)
+CircuitBreaker ->? : << diffuse tx to all >>
 return Circuit Open
 
 

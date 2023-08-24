@@ -1,7 +1,7 @@
 @startuml MovieAppScenario
 !pragma teoz true
 
-title "Movie App Example Success Scenario"
+title "Movie App Example Scenario"
 
 hide footbox
 actor Customer
@@ -15,16 +15,22 @@ participant AuthService
 end box
 
 box "Microservices"
-participant PrimeAppMS
+participant MovieAppMS
 end box
-
-Customer -> GatewayService ++ : ms1/\napi(ms1Inf, authInf)
-GatewayService -> LoadBalancer ++ : ms1/\napi(ms1Inf, authInf)
-LoadBalancer -> DiscoveryService ++ : getServiceInfo(MS1)
+loop Periodically
+GatewayService -> GatewayService : block = createBlock()
+GatewayService -> GatewayService : addTransactions(transactionList)
+GatewayService -> GatewayService : appendChain(block)
+end
+Customer -> GatewayService ++ : movie/\ngetFilm(movieInf, authInf)
+GatewayService -> LoadBalancer ++ : movie/\ngetFilm(movieInf, authInf)
+LoadBalancer -> DiscoveryService ++ : getServiceInfo(movie)
 return serviceAddress 
-LoadBalancer -> PrimeAppMS ++ : serviceAddress/ms1/api(ms1Inf, authInf)
-PrimeAppMS -> AuthService ++ : pushMessage(authInf)
-AuthService -> PrimeAppMS -- : dispatch(OK)
+LoadBalancer -> MovieAppMS ++ : serviceAddress/movie/getFilm(movieInf, authInf)
+LoadBalancer -> LoadBalancer: tx = addTransaction(CB,MovieAppMS,movieInf)
+LoadBalancer ->? : << diffuse tx to all >>
+MovieAppMS -> AuthService ++ : pushMessage(authInf)
+AuthService -> MovieAppMS -- : dispatch(OK)
 return return OK 
 return return OK 
 

@@ -1,7 +1,7 @@
 @startuml CustomerRegistrationScenario
 !pragma teoz true
 
-title "Circuit Breaker Open Scenario"
+title "Service Tracing Scenario"
 
 hide footbox
 actor Customer
